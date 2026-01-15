@@ -18,15 +18,15 @@ class Main(QtWidgets.QMainWindow):
 
         self.lineEdit_name = QtWidgets.QLineEdit()
         self.lineEdit_surname = QtWidgets.QLineEdit()
-        self.lineEdit_agename = QtWidgets.QLineEdit()
+        self.lineEdit_age = QtWidgets.QLineEdit()
 
         self.label_phone = QtWidgets.QLabel("Телефон:")
         self.label_email = QtWidgets.QLabel("Email:")
         self.label_city = QtWidgets.QLabel("Город:")
 
-        self.label_phone = QtWidgets.QLineEdit()
-        self.label_email = QtWidgets.QLineEdit()
-        self.label_city = QtWidgets.QLineEdit()
+        self.lineEdit_phone = QtWidgets.QLineEdit()
+        self.lineEdit_email = QtWidgets.QLineEdit()
+        self.lineEdit_city = QtWidgets.QLineEdit()
 
         self.button_phone = QtWidgets.QPushButton("Проверить")
         self.button_email = QtWidgets.QPushButton("Проверить")
@@ -70,33 +70,114 @@ class Main(QtWidgets.QMainWindow):
 
 
 
-        # middle left
+
 
         frame_middle_left = QtWidgets.QFrame()
-        frame_middle_left.setLineWidth(5)
+        frame_middle_left.setLineWidth(1)
         frame_middle_left.setFrameShape(QtWidgets.QFrame.Shape.Box)
 
         frame_middle_right = QtWidgets.QFrame()
         frame_middle_right.setLineWidth(1)
         frame_middle_right.setFrameShape(QtWidgets.QFrame.Shape.Box)
 
-        middle_left = QtWidgets.QVBoxLayout(frame_middle)
+        middle_left = QtWidgets.QHBoxLayout(frame_middle)
+
+        # middle left
+
         middle_left.addWidget(frame_middle_left)
 
-        middle_right = QtWidgets.QVBoxLayout(frame_middle)
-        middle_right.addWidget(frame_middle_right)
+        middle_leftt = QtWidgets.QVBoxLayout(frame_middle_left)
+
+        # middle left 1
+
+        frame_middle_left_1 = QtWidgets.QFrame()
+        frame_middle_left_1.setLineWidth(1)
+        frame_middle_left_1.setFrameShape(QtWidgets.QFrame.Shape.Box)
+
+        middle_leftt.addWidget(frame_middle_left_1)
+
+        middle_left_1 = QtWidgets.QHBoxLayout(frame_middle_left_1)
+        middle_left_1.addWidget(self.label_name)
+        middle_left_1.addWidget(self.lineEdit_name)
+
+        # middle left 2
+
+        frame_middle_left_2 = QtWidgets.QFrame()
+        frame_middle_left_2.setLineWidth(1)
+        frame_middle_left_2.setFrameShape(QtWidgets.QFrame.Shape.Box)
+
+        middle_leftt.addWidget(frame_middle_left_2)
+
+        middle_left_2 = QtWidgets.QHBoxLayout(frame_middle_left_2)
+        middle_left_2.addWidget(self.label_surname)
+        middle_left_2.addWidget(self.lineEdit_surname)
 
 
+        # middle left 3
+
+        frame_middle_left_3 = QtWidgets.QFrame()
+        frame_middle_left_3.setLineWidth(1)
+        frame_middle_left_3.setFrameShape(QtWidgets.QFrame.Shape.Box)
+
+        middle_leftt.addWidget(frame_middle_left_3)
+
+        middle_left_3 = QtWidgets.QHBoxLayout(frame_middle_left_3)
+        middle_left_3.addWidget(self.label_age)
+        middle_left_3.addWidget(self.lineEdit_age)
 
         #middle right
 
+        middle_left.addWidget(frame_middle_right)
 
+        middle_rightt = QtWidgets.QVBoxLayout(frame_middle_right)
 
+        # middle right 1
 
+        frame_middle_right_1 = QtWidgets.QFrame()
+        frame_middle_right_1.setLineWidth(1)
+        frame_middle_right_1.setFrameShape(QtWidgets.QFrame.Shape.Box)
+
+        middle_rightt.addWidget(frame_middle_right_1)
+
+        middle_right_1 = QtWidgets.QHBoxLayout(frame_middle_right_1)
+        middle_right_1.addWidget(self.label_phone)
+        middle_right_1.addWidget(self.lineEdit_phone)
+        middle_right_1.addWidget(self.button_phone)
+
+        # middle right 2
+
+        frame_middle_right_2 = QtWidgets.QFrame()
+        frame_middle_right_2.setLineWidth(1)
+        frame_middle_right_2.setFrameShape(QtWidgets.QFrame.Shape.Box)
+
+        middle_rightt.addWidget(frame_middle_right_2)
+
+        middle_right_2 = QtWidgets.QHBoxLayout(frame_middle_right_2)
+        middle_right_2.addWidget(self.label_email)
+        middle_right_2.addWidget(self.lineEdit_email)
+        middle_right_2.addWidget(self.button_email)
+
+        # middle right 3
+
+        frame_middle_right_3 = QtWidgets.QFrame()
+        frame_middle_right_3.setLineWidth(1)
+        frame_middle_right_3.setFrameShape(QtWidgets.QFrame.Shape.Box)
+
+        middle_rightt.addWidget(frame_middle_right_3)
+
+        middle_right_3 = QtWidgets.QHBoxLayout(frame_middle_right_3)
+        middle_right_3.addWidget(self.label_city)
+        middle_right_3.addWidget(self.lineEdit_city)
+        middle_right_3.addWidget(self.button_city)
 
 
         #bottom
         main_verticall.addWidget(frame_bottom)
+
+        bottom = QtWidgets.QHBoxLayout(frame_bottom)
+        bottom.addWidget(self.button_send)
+        bottom.addWidget(self.button_clear)
+        bottom.addWidget(self.button_cancel)
 
 
 
