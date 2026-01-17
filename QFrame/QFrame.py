@@ -180,13 +180,6 @@ class Main(QtWidgets.QMainWindow):
         bottom.addWidget(self.button_cancel)
 
 
-
-
-
-
-
-
-
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
