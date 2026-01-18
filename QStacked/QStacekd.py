@@ -15,16 +15,16 @@ class Main(QMainWindow):
         center = QWidget()
         self.setCentralWidget(center)
 
-        button_forward = QPushButton("Вперед→")
-        button_back = QPushButton("←Назад")
+        self.button_forward = QPushButton("Вперед→")
+        self.button_back = QPushButton("←Назад")
 
         main_vertical = QVBoxLayout(center)
 
         self.stack = QStackedLayout()
 
         button_layout = QHBoxLayout()
-        button_layout.addWidget(button_back)
-        button_layout.addWidget(button_forward)
+        button_layout.addWidget(self.button_back)
+        button_layout.addWidget(self.button_forward)
 
         main_vertical.addLayout(self.stack)
         main_vertical.addLayout(button_layout)
@@ -218,11 +218,14 @@ class Main(QMainWindow):
         self.stack.addWidget(stack_2)
         self.stack.addWidget(stack_3)
 
-        button_forward.clicked.connect(self.go_forward)
-        button_back.clicked.connect(self.go_back)
+        self.button_forward.clicked.connect(self.go_forward)
+        self.button_back.clicked.connect(self.go_back)
 
     def go_forward(self):
         self.stack.setCurrentIndex(self.stack.currentIndex() + 1)
+        if self.stack.currentIndex() == 2:
+            self.button_forward.setText("Завершить")
+
 
     def go_back(self):
         self.stack.setCurrentIndex(self.stack.currentIndex()-1)
