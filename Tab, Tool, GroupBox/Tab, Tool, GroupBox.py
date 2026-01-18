@@ -1,14 +1,13 @@
-import sys
-
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import *
+
 
 class Main(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setupUI()
+        self.setupui()
 
-    def setupUI(self):
+    def setupui(self):
         self.setWindowTitle("Управление умным домом")
         self.resize(535, 550)
 
@@ -17,17 +16,17 @@ class Main(QMainWindow):
 
         main_layout = QVBoxLayout(central)
 
-        #manadge_page
+        # manage_page
 
-        manadge_page = QToolBox()
+        manage_page = QToolBox()
 
         tab1 = QWidget()
-        climat = QVBoxLayout(tab1)
-        climat.addWidget(QLabel("Температура(°С):"))
-        climat.addWidget(QSpinBox())
-        climat.addWidget(QLabel("Влажность(%):"))
+        climate = QVBoxLayout(tab1)
+        climate.addWidget(QLabel("Температура(°С):"))
+        climate.addWidget(QSpinBox())
+        climate.addWidget(QLabel("Влажность(%):"))
         slider = QSlider(Qt.Orientation.Horizontal)
-        climat.addWidget(slider)
+        climate.addWidget(slider)
 
         tab2 = QWidget()
         light = QVBoxLayout(tab2)
@@ -39,13 +38,13 @@ class Main(QMainWindow):
         tab3 = QWidget()
         safety = QVBoxLayout(tab3)
         check_open = QCheckBox("Открыть дверь")
-        check_close= QCheckBox("Закрыть дверь")
+        check_close = QCheckBox("Закрыть дверь")
         safety.addWidget(check_open)
         safety.addWidget(check_close)
 
-        manadge_page.addItem(tab1, "Климат")
-        manadge_page.addItem(tab2, "Освещение")
-        manadge_page.addItem(tab3, "Безопасность")
+        manage_page.addItem(tab1, "Климат")
+        manage_page.addItem(tab2, "Освещение")
+        manage_page.addItem(tab3, "Безопасность")
 
         # mode page
 
@@ -54,7 +53,7 @@ class Main(QMainWindow):
 
         group_box_1 = QGroupBox()
         group_box_1.setTitle("Режим работы системы")
-        vertical_box_1 =QVBoxLayout(group_box_1)
+        vertical_box_1 = QVBoxLayout(group_box_1)
         vertical_box_1.addWidget(QRadioButton("Экономный"))
         vertical_box_1.addWidget(QRadioButton("Комфортный"))
         vertical_box_1.addWidget(QRadioButton("Автоматически"))
@@ -96,24 +95,17 @@ class Main(QMainWindow):
         vertical_device_2.addWidget(QCheckBox("Ночной режим"))
         vertical_device_2.addWidget(QCheckBox("Режим отпуска"))
 
-
-
         table = QTabWidget()
-        table.addTab(manadge_page, "Управление")
+        table.addTab(manage_page, "Управление")
         table.addTab(mode_page, "Режимы")
         table.addTab(device_page, "Утсройства")
-
 
         main_layout.addWidget(table)
 
 
-
-
-
-
 if __name__ == "__main__":
     import sys
-    app =QApplication(sys.argv)
+    app = QApplication(sys.argv)
     window = Main()
     window.show()
     sys.exit(app.exec())
