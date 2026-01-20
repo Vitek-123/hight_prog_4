@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import *
-
+from PyQt6.QtCore import QRegularExpression
+from PyQt6.QtGui import QRegularExpressionValidator
+import ast
 
 class Main(QMainWindow):
     def __init__(self):
@@ -12,6 +14,8 @@ class Main(QMainWindow):
         self.stacked = QStackedLayout()
         main_widget.addLayout(self.stacked)
         self.main_list = []
+        self.validator_figure = QRegularExpressionValidator(QRegularExpression("[0-9]+"))
+        self.validator_letter = QRegularExpressionValidator(QRegularExpression("[а-яА-Я]+"))
 
         # stack 1
         stacked1 = QWidget()
@@ -25,7 +29,7 @@ class Main(QMainWindow):
         self.stacked1_group1_check1 = QCheckBox("ГОООООЛЛЛ")
         self.stacked1_group1_check2 = QCheckBox("УРАА")
         self.stacked1_group1_check3 = QCheckBox("ДАААА")
-        self.stacked1_group1_check4 = QCheckBox("SSSUUUUUUUUII") # +
+        self.stacked1_group1_check4 = QCheckBox("SSSUUUUUUUUII")  # +
 
         stack1_vertical.addWidget(stacked1_group1)
         vertical_stacked1_group1.addWidget(self.stacked1_group1_check1)
@@ -38,10 +42,10 @@ class Main(QMainWindow):
         stacked1_group2 = QGroupBox()
         vertical_stacked1_group2 = QHBoxLayout(stacked1_group2)
         stacked1_group2.setTitle("Какие компании принадлежат Илону Маску?")
-        self.stacked1_group2_check1 = QCheckBox("SpaceX") # +
+        self.stacked1_group2_check1 = QCheckBox("SpaceX")  # +
         self.stacked1_group2_check2 = QCheckBox("Tesla")  # +
-        self.stacked1_group2_check3 = QCheckBox("Neuralink") # +
-        self.stacked1_group2_check4 = QCheckBox("X") # +
+        self.stacked1_group2_check3 = QCheckBox("Neuralink")  # +
+        self.stacked1_group2_check4 = QCheckBox("X")  # +
 
         stack1_vertical.addWidget(stacked1_group2)
 
@@ -89,10 +93,10 @@ class Main(QMainWindow):
         stacked1_group5 = QGroupBox()
         vertical_stacked1_group5 = QVBoxLayout(stacked1_group5)
         stacked1_group5.setTitle("Выберите преподователей КМПО РАНХиГС")
-        self.stacked1_group5_check1 = QCheckBox("Бабаева Назият Агабеговна") # +
-        self.stacked1_group5_check2 = QCheckBox("Васильев Сергей Валентинович") # +
+        self.stacked1_group5_check1 = QCheckBox("Бабаева Назият Агабеговна")  # +
+        self.stacked1_group5_check2 = QCheckBox("Васильев Сергей Валентинович")  # +
         self.stacked1_group5_check3 = QCheckBox("Калашникова Ольга Алексеевна")  # +
-        self.stacked1_group5_check4 = QCheckBox("Юров Иван Сергеевич") # +
+        self.stacked1_group5_check4 = QCheckBox("Юров Иван Сергеевич")  # +
 
         stack1_vertical.addWidget(stacked1_group5)
 
@@ -111,9 +115,6 @@ class Main(QMainWindow):
         stacked2_vertical = QVBoxLayout(stacked2)
         self.stacked2_button = QPushButton("Далее")
 
-
-
-
         # stacked 2 question 1
 
         stacked2_group1 = QGroupBox()
@@ -125,7 +126,6 @@ class Main(QMainWindow):
         stacked2_vertical.addWidget(stacked2_group1)
         vertical_stacked2_group1.addWidget(self.stacked2_group1_radio1)
         vertical_stacked2_group1.addWidget(self.stacked2_group1_radio2)
-
 
         # stacked 2 question 2
 
@@ -182,7 +182,7 @@ class Main(QMainWindow):
         stacked3 = QWidget()
         stacked3_vertical = QVBoxLayout(stacked3)
         self.stacked3_button = QPushButton("Завершить")
-        self.stacked3_button.clicked.connect(self.go_stacked2)
+        self.stacked3_button.clicked.connect(self.go_stacked4)
 
         # stacked 3 question 1
 
@@ -190,7 +190,8 @@ class Main(QMainWindow):
         stacked3_group1.setTitle("Решить уравнение")
         vertical_stacked3_group1 = QVBoxLayout(stacked3_group1)
         self.stacked3_group1_label1 = QLabel("(2x²-x+1)²+x²(2x²-x+1)-6x⁴=0")  # 1
-        self.stacked3_group1_lineEdit1 = QLineEdit()
+        self.stacked3_group1_lineEdit1 = QLineEdit("1")
+        self.stacked3_group1_lineEdit1.setValidator(self.validator_figure)
 
         stacked3_vertical.addWidget(stacked3_group1)
         vertical_stacked3_group1.addWidget(self.stacked3_group1_label1)
@@ -201,10 +202,11 @@ class Main(QMainWindow):
         stacked3_group2 = QGroupBox()
         stacked3_group2.setTitle("Сколько мне лет")
         vertical_stacked3_group2 = QVBoxLayout(stacked3_group2)
-        self.stacked3_group2_lineEdit2 = QLineEdit()  # 19
+        self.stacked3_group2_lineEdit2 = QLineEdit("1")  # 19
 
         stacked3_vertical.addWidget(stacked3_group2)
         vertical_stacked3_group2.addWidget(self.stacked3_group2_lineEdit2)
+        self.stacked3_group2_lineEdit2.setValidator(self.validator_figure)
 
         # stacked 3 question 3
 
@@ -212,7 +214,8 @@ class Main(QMainWindow):
         stacked3_group3.setTitle("В каких месяцах 28 дней")
         vertical_stacked3_group3 = QVBoxLayout(stacked3_group3)
         self.stacked3_group3_label3 = QLabel("Напишите число")
-        self.stacked3_group3_lineEdit3 = QLineEdit()  # 12
+        self.stacked3_group3_lineEdit3 = QLineEdit("1")  # 12
+        self.stacked3_group3_lineEdit3.setValidator(self.validator_figure)
 
         stacked3_vertical.addWidget(stacked3_group3)
         vertical_stacked3_group3.addWidget(self.stacked3_group3_label3)
@@ -223,7 +226,8 @@ class Main(QMainWindow):
         stacked3_group4 = QGroupBox()
         stacked3_group4.setTitle("Как меня зовут?")
         vertical_stacked3_group4 = QVBoxLayout(stacked3_group4)
-        self.stacked3_group4_lineEdit4 = QLineEdit()  # Виктор
+        self.stacked3_group4_lineEdit4 = QLineEdit("ф")  # Виктор
+        self.stacked3_group4_lineEdit4.setValidator(self.validator_letter)
 
         stacked3_vertical.addWidget(stacked3_group4)
         vertical_stacked3_group4.addWidget(self.stacked3_group4_lineEdit4)
@@ -233,7 +237,8 @@ class Main(QMainWindow):
         stacked3_group5 = QGroupBox()
         stacked3_group5.setTitle("Напишите любую цифру")
         vertical_stacked3_group5 = QVBoxLayout(stacked3_group5)
-        self.stacked3_group5_lineEdit5 = QLineEdit()  # 2
+        self.stacked3_group5_lineEdit5 = QLineEdit("1")  # 2
+        self.stacked3_group5_lineEdit5.setValidator(self.validator_figure)
 
         stacked3_vertical.addWidget(stacked3_group5)
         vertical_stacked3_group5.addWidget(self.stacked3_group5_lineEdit5)
@@ -242,17 +247,48 @@ class Main(QMainWindow):
 
         # stack 4
         stacked4 = QWidget()
-        stacked4_vertical = QVBoxLayout(stacked4)
+        self.stacked4_vertical = QVBoxLayout(stacked4)
         self.stacked4_button = QPushButton("Далее")
-        self.stacked4_button.clicked.connect(self.go_stacked2)
-        stacked4_vertical.addWidget(QLabel("52"))
+        self.stacked4_button.clicked.connect(self.go_stacked5)
+
+        # stack 5
+
+        stacked5 = QWidget()
+        self.stacked5_vertical = QHBoxLayout(stacked5)
+
+        # stack 5 group 1
+
+        self.stacked5_group1 = QGroupBox()
+        self.stacked5_group1.setTitle("Блок 1")
+
+        self.stacked5_vertical.addWidget(self.stacked5_group1)
+        self.vertical_stacked5_group1 = QVBoxLayout(self.stacked5_group1)
+
+        # stack 5 group 2
+
+        self.stacked5_group2 = QGroupBox()
+        self.stacked5_group2.setTitle("Блок 2")
+        self.stacked5_vertical.addWidget(self.stacked5_group2)
+        self.vertical_stacked5_group2 = QVBoxLayout(self.stacked5_group2)
 
 
+
+        # stack 5 group 3
+
+        self.stacked5_group3 = QGroupBox()
+        self.stacked5_group3.setTitle("Блок 3")
+        self.stacked5_vertical.addWidget(self.stacked5_group3)
+        self.vertical_stacked5_group3 = QVBoxLayout(self.stacked5_group3)
+
+
+
+        # stack
 
         self.stacked.addWidget(stacked1)
         self.stacked.addWidget(stacked2)
         self.stacked.addWidget(stacked3)
         self.stacked.addWidget(stacked4)
+        self.stacked.addWidget(stacked5)
 
     def go_stacked2(self):
         if self.stacked1_group1_check4.isChecked():
@@ -280,51 +316,111 @@ class Main(QMainWindow):
         else:
             self.main_list.append(0)
         self.stacked.setCurrentIndex(self.stacked.currentIndex() + 1)
-        print(self.main_list)
+
 
     def go_stacked3(self):
-        #1
+        # 1
         if self.stacked2_group1_radio1.isChecked():
             self.main_list.append(1)
         else:
             self.main_list.append(0)
 
-        #2
+        # 2
         if self.stacked2_group2_radio1.isChecked():
             self.main_list.append(1)
         else:
             self.main_list.append(0)
 
-        #3
+        # 3
         if self.stacked2_group3_radio1.isChecked():
             self.main_list.append(1)
         else:
             self.main_list.append(0)
 
-        #4
+        # 4
         if self.stacked2_group4_radio1.isChecked():
             self.main_list.append(1)
         else:
             self.main_list.append(0)
 
-        #5
+        # 5
         if self.stacked2_group4_radio1.isChecked():
             self.main_list.append(1)
         else:
             self.main_list.append(0)
 
-        print(self.main_list)
         self.stacked.setCurrentIndex(self.stacked.currentIndex()+1)
 
+    def go_stacked4(self):
+        try:
+            if int(self.stacked3_group1_lineEdit1.text()) == 1:
+                self.main_list.append(1)
+            else:
+                self.main_list.append(0)
 
+            if int(self.stacked3_group2_lineEdit2.text()) == 19:
+                self.main_list.append(1)
+            else:
+                self.main_list.append(0)
 
+            if int(self.stacked3_group3_lineEdit3.text()) == 12:
+                self.main_list.append(1)
+            else:
+                self.main_list.append(0)
 
+            if self.stacked3_group4_lineEdit4.text() == "Виктор":
+                self.main_list.append(1)
+            else:
+                self.main_list.append(0)
 
+            if int(self.stacked3_group5_lineEdit5.text()) == 2:
+                self.main_list.append(1)
+            else:
+                self.main_list.append(0)
 
+            self.stacked.setCurrentIndex(self.stacked.currentIndex() + 1)
+            self.stacked4_vertical.addWidget(QLabel(f"Верных ответов: {str(sum(self.main_list))},    {int(sum(self.main_list))/15*100:.2f}%"))
+            self.stacked4_vertical.addWidget(
+                QLabel(f"Неверных ответов: {15- int(sum(self.main_list))},    {(15 - int(sum(self.main_list))) / 15 * 100:.2f}%"))
+            self.stacked4_vertical.addWidget(self.stacked4_button)
 
+        except Exception as e:
+            if str(e) == "invalid literal for int() with base 10: ''":
+                QMessageBox.warning(self, "eror", "Заполните все поля")
+            print(e)
 
+    def go_stacked5(self):
+        self.stacked.setCurrentIndex(self.stacked.currentIndex()+1)
+        try:
+            with open('result.txt', 'r', encoding='utf-8') as file:
+                self.content = file.readlines()
+                self.count_try = int(self.content[0].strip())
+                self.count_try += 1
+                self.content[0] = str(self.count_try) + '\n'
+                self.array = ast.literal_eval(self.content[1].strip())
 
+            with open('result.txt', 'w', encoding='utf-8') as file:
+                for i in range(len(self.main_list)):
+                    self.array[i] += self.main_list[i]
+                self.content[1] = str(self.array)
 
+                file.writelines(self.content)
+
+            with open('result.txt', 'r', encoding='utf-8') as file:
+                for i in range(5):
+                    self.correct = self.array[i]
+                    self.vertical_stacked5_group1.addWidget(QLabel(f"{i+1}й-вопрос:\n верных: {self.correct},  неверных {int(self.count_try) - int(self.correct)}"))
+
+                for i in range(5, 10):
+                    self.correct = self.array[i]
+                    self.vertical_stacked5_group2.addWidget(QLabel(f"{i+1}й-вопрос:\n верных: {self.correct}, неверных {int(self.count_try) - int(self.correct)}"))
+
+                for i in range(10, 15):
+                    self.correct = self.array[i]
+                    self.vertical_stacked5_group3.addWidget(QLabel(f"{i+1}й-вопрос:\n верных: {self.correct}, неверных {int(self.count_try) - int(self.correct)}"))
+
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":
