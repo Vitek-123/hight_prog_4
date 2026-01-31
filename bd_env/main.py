@@ -79,7 +79,7 @@ class Main(QMainWindow):
                 self.content_scroll_info = QLabel("Подробнее")
                 self.content_scroll_info.setFrameShape(QFrame.Shape.Box)
 
-                self.content_scroll_info.mousePressEvent = lambda event: self.more_info(db)
+                self.content_scroll_info.mousePressEvent = lambda event, idx = i[0]: self.show_more_info(idx)
 
                 self.content_scroll_sale = QLabel()
                 self.content_scroll_sale.setFrameShape(QFrame.Shape.Box)
@@ -111,18 +111,19 @@ class Main(QMainWindow):
     def go_back(self):
         self.stacked.setCurrentIndex(self.stacked.currentIndex()-1)
 
-    def show_more_info(self):
-        self.more_info = MoreInfo(self.db)
+    def show_more_info(self, idx):
+        self.more_info = MoreInfo(self.db, idx)
         self.more_info.show()
 
 class MoreInfo(QWidget):
-    def __init__(self, db):
+    def __init__(self, db, idx):
         self.db = db
+        self.id = idx
         super().__init__()
         self.resize(200, 150)
         self.setWindowTitle("Подробная информация")
 
-        print(self.db.technic())
+        print(self.id)
 
 if __name__ == "__main__":
     import sys
