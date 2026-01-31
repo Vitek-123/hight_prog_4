@@ -3,7 +3,9 @@ import pymysql
 from dotenv import load_dotenv
 from PyQt6.QtWidgets import *
 from PyQt6 import QtGui, QtCore
+import math
 load_dotenv()
+
 
 class Base():
     def __init__(self):
@@ -16,7 +18,7 @@ class Base():
 
         self.cursor = conn.cursor()
 
-    def show_meters(self):
+    def technic(self):
         self.cursor.execute("select * from techic")
         meters = self.cursor.fetchall()
         return meters
@@ -30,48 +32,58 @@ class Main(QMainWindow):
         self.setWindowTitle("Ремонт")
         self.resize(800, 300)
 
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        central_vertical = QVBoxLayout(central_widget)
+        self.central_vidget = QWidget()
+        self.setCentralWidget(self.central_vidget)
 
-        scrollarea = QScrollArea()
-        scrollarea.setWidgetResizable(True)
-        central_vertical.addWidget(scrollarea)
-        self.botton_next = QPushButton("Дальше")
-        self.botton_back = QPushButton("Назад")
-        self.botton_next.clicked.connect(self.go_next)
+        self.vertical_center = QVBoxLayout(self.central_vidget)
 
-        central_vertical.addWidget(self.botton_next)
-        central_vertical.addWidget(self.botton_back)
+        self.stacked = QStackedLayout(self.vertical_center)
+        self.central_button_next = QPushButton("Next")
+        self.central_button_back = QPushButton("Back")
 
-        self.stacked = QStackedLayout()
-        self.stacked.addWidget()
+        self.central_button_next.clicked.connect(self.go_next)
+        self.central_button_back.clicked.connect(self.go_back)
+
+        self.technic = self.db.technic()
+        self.count_product = len(self.technic)
+        self.count_page = math.ceil(self.count_product/5)
+
+        for i in range(self.count_page):
+            self.content_widget = QWidget()
+            self.vertical_for_scroll = QVBoxLayout(self.content_widget)
+
+            self.scrollarea = QScrollArea()
+            self.scrollarea.setWidgetResizable(True)
+
+            self.vertical_scroll = QVBoxLayout()
+            self.scrollarea.setLayout(self.vertical_scroll)
+
+            self.content_scroll_widget = QWidget()
+            self.content_scroll_vertical = QVBoxLayout(self.content_scroll_widget)
 
 
-        content_widget = QWidget()
-        scrollarea.setWidget(content_widget)
+            self.vertical_for_scroll.addWidget(self.scrollarea)
+            self.scrollarea.setWidget(self.content_scroll_widget)
+            self.stacked.addWidget(self.content_widget)
+            self.stop_product = 0
+            i = self.stop_product
+            for i in self.technic:
+                if i[0] % 6 == 0:
+                    break
+                else:
+                    self.content_scroll_vertical.addWidget(QLabel(f"{i[0]}"))
 
-        vertical_content = QVBoxLayout(content_widget)
-        for i in self.db.show_meters():
-            frame = QFrame()
-            frame.setFrameShape(QFrame.Shape.Box)
-            frame.setLineWidth(1)
-            vertical_content.addWidget(frame)
-            horizontal_content = QHBoxLayout(frame)
 
-            content_pictures = QLabel()
-            content_pictures.setPixmap(QtGui.QPixmap(f"resourse/icon1.png").scaled(100, 100))
+        # Добавление
 
-            horizontal_content.addWidget(content_pictures)
-
-            print(i)
-
-        vertical_content.addStretch()
+        self.vertical_center.addWidget(self.central_button_next)
+        self.vertical_center.addWidget(self.central_button_back)
 
     def go_next(self):
-        self.stacked.
+        self.stacked.setCurrentIndex(self.stacked.currentIndex()+1)
 
-
+    def go_back(self):
+        self.stacked.setCurrentIndex(self.stacked.currentIndex()-1)
 
 
 if __name__ == "__main__":
