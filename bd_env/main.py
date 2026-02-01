@@ -23,6 +23,16 @@ class Base():
         meters = self.cursor.fetchall()
         return meters
 
+    def repair(self):
+        self.cursor.execute("select * from repair")
+        repair = self.cursor.fetchall()
+        return repair
+
+    def more_info(self, id):
+        self.cursor.execute(f"call More_info({id});")
+        more_info = self.cursor.fetchall()
+        return more_info
+
 
 
 class Main(QMainWindow):
@@ -79,7 +89,7 @@ class Main(QMainWindow):
                 self.content_scroll_info = QLabel("Подробнее")
                 self.content_scroll_info.setFrameShape(QFrame.Shape.Box)
 
-                self.content_scroll_info.mousePressEvent = lambda event, idx = i[0]: self.show_more_info(idx)
+                self.content_scroll_info.mousePressEvent = lambda event, id = i[0]: self.show_more_info(id)
 
                 self.content_scroll_sale = QLabel()
                 self.content_scroll_sale.setFrameShape(QFrame.Shape.Box)
@@ -100,6 +110,7 @@ class Main(QMainWindow):
 
 
 
+
         # Добавление
 
         self.vertical_center.addWidget(self.central_button_next)
@@ -111,19 +122,38 @@ class Main(QMainWindow):
     def go_back(self):
         self.stacked.setCurrentIndex(self.stacked.currentIndex()-1)
 
-    def show_more_info(self, idx):
-        self.more_info = MoreInfo(self.db, idx)
+    def show_more_info(self, id):
+        self.more_info = MoreInfo(self.db, id)
         self.more_info.show()
 
 class MoreInfo(QWidget):
-    def __init__(self, db, idx):
+    def __init__(self, db, id):
         self.db = db
-        self.id = idx
+        self.id = id
         super().__init__()
-        self.resize(200, 150)
-        self.setWindowTitle("Подробная информация")
+        self.setWindowTitle("Подробрее")
+        self.resize(400, 400)
 
-        print(self.id)
+        self.main_layout = QVBoxLayout(self)
+
+        self.more_info = self.db.more_info(self.id)
+
+        self.type_technic = self.more_info[0][0]
+        self.brend = self.more_info[0][1]
+        self.model = self.more_info[0][2]
+        self.work = self.more_info[0][3]
+        self.price = self.more_info[0][4]
+
+        self.main_layout.addWidget(QLabel(f"Тип: {self.type_technic}"))
+        self.main_layout.addWidget(QLabel(f"Бренд: {self.brend}"))
+        self.main_layout.addWidget(QLabel(f"Модель: {self.model}"))
+        self.main_layout.addWidget(QLabel(f"Перечень работ: {self.work}"))
+        self.main_layout.addWidget(QLabel(f"Цена: {str(self.price)}"))
+
+
+
+
+
 
 if __name__ == "__main__":
     import sys
