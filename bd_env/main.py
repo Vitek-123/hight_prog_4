@@ -34,27 +34,62 @@ class Base():
         return more_info
 
 
-
 class Main(QMainWindow):
     def __init__(self, db):
         self.db = db
         super().__init__()
         self.setWindowTitle("Ремонт")
         self.resize(800, 300)
+        self.next_enable = True
+        self.back_enable = False
+
+        self.logIn_button = QPushButton("log_in")
+        self.logIn_button.clicked.connect(self.log_in)
 
         self.central_vidget = QWidget()
         self.setCentralWidget(self.central_vidget)
 
+        # menubar start
+        self.menu_bar = QMenuBar()
+        self.file = self.menu_bar.addMenu("Личный кабинет")
+
+        self.action_info = QtGui.QAction("О пользователе", self)
+        self.action_exit = QtGui.QAction("Выход", self)
+
+        self.file.addAction(self.action_info)
+        self.file.addAction(self.action_exit)
+
+        self.action_exit.triggered.connect(self.exit)
+
+        self.menu_bar.hide()
+        # menubar end
+
         self.vertical_center = QVBoxLayout(self.central_vidget)
+
+        # start H Layout for menu
+        self.horizontal_for_menu = QHBoxLayout()
+
+        self.horizontal_for_menu.addWidget(self.menu_bar)
+        self.horizontal_for_menu.addStretch()
+        self.horizontal_for_menu.addWidget(self.logIn_button)
+
+        self.vertical_center.addLayout(self.horizontal_for_menu)
+        # end H Layout for menu
 
         self.stacked = QStackedLayout(self.vertical_center)
         self.central_button_next = QPushButton("Next")
+
         self.central_button_back = QPushButton("Back")
+        self.central_button_back.setEnabled(self.back_enable)
+
+        self.central_button_logIn = QPushButton("log in")
+
+
 
         self.central_button_next.clicked.connect(self.go_next)
         self.central_button_back.clicked.connect(self.go_back)
 
-        #bd
+        # bd
 
         self.technic = self.db.technic()
         self.count_product = len(self.technic)
@@ -72,7 +107,6 @@ class Main(QMainWindow):
 
             self.content_scroll_widget = QWidget()
             self.content_scroll_vertical = QVBoxLayout(self.content_scroll_widget)
-
 
             self.vertical_for_scroll.addWidget(self.scrollarea)
             self.scrollarea.setWidget(self.content_scroll_widget)
@@ -98,8 +132,6 @@ class Main(QMainWindow):
                 else:
                     self.content_scroll_sale.setText("Скидка - 0%")
 
-
-
                 self.content_scroll_vertical_horizontal.addWidget(self.content_scroll_pictures)
                 self.content_scroll_vertical_horizontal.addWidget(self.content_scroll_info, stretch=5)
                 self.content_scroll_vertical_horizontal.addWidget(self.content_scroll_sale, stretch=1)
@@ -107,24 +139,39 @@ class Main(QMainWindow):
                     self.technic = self.technic[5:]
                     break
 
-
-
-
-
         # Добавление
 
         self.vertical_center.addWidget(self.central_button_next)
         self.vertical_center.addWidget(self.central_button_back)
 
     def go_next(self):
+        if self.stacked.currentIndex() != -1:
+            self.back_enable = True
+            self.central_button_back.setEnabled(self.back_enable)
+        if self.stacked.currentIndex() == self.count_page - 2:
+            self.next_enable = False
+            self.central_button_next.setEnabled(self.next_enable)
         self.stacked.setCurrentIndex(self.stacked.currentIndex()+1)
 
     def go_back(self):
         self.stacked.setCurrentIndex(self.stacked.currentIndex()-1)
+        if self.stacked.currentIndex() == 0:
+            self.back_enable = False
+            self.central_button_back.setEnabled(self.back_enable)
+        if self.stacked.currentIndex() != self.count_page:
+            self.next_enable = True
+            self.central_button_next.setEnabled(self.next_enable)
 
     def show_more_info(self, id):
         self.more_info = MoreInfo(self.db, id)
         self.more_info.show()
+
+    def log_in(self):
+        self.menu_bar.show()
+
+    def exit(self):
+        self.menu_bar.hide()
+
 
 class MoreInfo(QWidget):
     def __init__(self, db, id):
@@ -149,10 +196,6 @@ class MoreInfo(QWidget):
         self.main_layout.addWidget(QLabel(f"Модель: {self.model}"))
         self.main_layout.addWidget(QLabel(f"Перечень работ: {self.work}"))
         self.main_layout.addWidget(QLabel(f"Цена: {str(self.price)}"))
-
-
-
-
 
 
 if __name__ == "__main__":
