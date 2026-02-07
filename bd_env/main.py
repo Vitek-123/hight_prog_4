@@ -1,9 +1,11 @@
-import os
-import pymysql
-from dotenv import load_dotenv
-from PyQt6.QtWidgets import *
-from PyQt6 import QtGui, QtCore
 import math
+import os
+
+import pymysql
+from PyQt6 import QtGui
+from PyQt6.QtWidgets import *
+from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -33,10 +35,27 @@ class Base():
         more_info = self.cursor.fetchall()
         return more_info
 
+    def go_in(self, login, password):
+        self.cursor.execute("SELECT id_client from client where client.login = %s and client.password = %s;", (login, password))
+        self.client = self.cursor.fetchall()
+        if self.client:
+            return self.client[0][0]
+        else:
+            return
+
+    def info_user(self, id):
+        self.cursor.execute("select name, surname, phone, email, photo from client where id_client = %s", id)
+        self.name_user = self.cursor.fetchall()
+        return self.name_user
+    
+    # НАЙТИ id по паролю
+
+
 
 class Main(QMainWindow):
     def __init__(self, db):
         self.db = db
+        self.current_user_id = None
         super().__init__()
         self.setWindowTitle("Ремонт")
         self.resize(800, 300)
@@ -48,18 +67,27 @@ class Main(QMainWindow):
 
         self.central_vidget = QWidget()
         self.setCentralWidget(self.central_vidget)
+        self.stacked_widget = QStackedWidget()
+
+        self.group_box = QGroupBox()
+
+        self.vertical_group = QVBoxLayout(self.group_box)
 
         # menubar start
-        self.menu_bar = QMenuBar()
+        self.menu_bar = QMenuBar(parent=None)
         self.file = self.menu_bar.addMenu("Личный кабинет")
 
-        self.action_info = QtGui.QAction("О пользователе", self)
+        self.action_info = QtGui.QAction("Каталог", self)
         self.action_exit = QtGui.QAction("Выход", self)
+        self.action_user = QtGui.QAction("О пользователе", self)
 
         self.file.addAction(self.action_info)
+        self.file.addAction(self.action_user)
         self.file.addAction(self.action_exit)
 
         self.action_exit.triggered.connect(self.exit)
+        self.action_user.triggered.connect(self.user)
+        self.action_info.triggered.connect(self.catalog)
 
         self.menu_bar.hide()
         # menubar end
@@ -73,18 +101,13 @@ class Main(QMainWindow):
         self.horizontal_for_menu.addStretch()
         self.horizontal_for_menu.addWidget(self.logIn_button)
 
-        self.vertical_center.addLayout(self.horizontal_for_menu)
         # end H Layout for menu
 
-        self.stacked = QStackedLayout(self.vertical_center)
+        self.stacked = QStackedLayout(self.vertical_group)
         self.central_button_next = QPushButton("Next")
 
         self.central_button_back = QPushButton("Back")
         self.central_button_back.setEnabled(self.back_enable)
-
-        self.central_button_logIn = QPushButton("log in")
-
-
 
         self.central_button_next.clicked.connect(self.go_next)
         self.central_button_back.clicked.connect(self.go_back)
@@ -139,10 +162,59 @@ class Main(QMainWindow):
                     self.technic = self.technic[5:]
                     break
 
+        # GROUP BOX 2
+
+
+        self.group_box_user = QGroupBox("О пользоватете")
+        self.vertical_group_vertical = QVBoxLayout(self.group_box_user)
+
+        self.label_photo_user = QLabel("Фото")
+
+        self.pictures_photo_user = QLabel()
+        self.pictures_photo_user.setPixmap(QtGui.QPixmap("resourse/icon1.png").scaled(150, 150))
+
+        self.name_user_label = QLabel("Имя")
+        self.name_user_lineEdit = QLineEdit()
+
+        self.surname_user_label = QLabel("Фамилия")
+        self.surname_user_lineEdit = QLineEdit()
+
+        self.email_user_label = QLabel("Почта")
+        self.email_user_lineEdit = QLineEdit()
+
+        self.phone_user_label = QLabel("Телефон")
+        self.phone_user_lineEdit = QLineEdit()
+
+        self.edit_pass_user_button = QPushButton("Изменить пароль")
+        self.save_pass_user_button = QPushButton("Сохранить")
+
+        self.edit_pass_user_button.clicked.connect(self.changepass)
+
+        self.vertical_group_vertical.addWidget(self.label_photo_user)
+        self.vertical_group_vertical.addWidget(self.pictures_photo_user)
+        self.vertical_group_vertical.addWidget(self.name_user_label)
+        self.vertical_group_vertical.addWidget(self.name_user_lineEdit)
+        self.vertical_group_vertical.addWidget(self.surname_user_label)
+        self.vertical_group_vertical.addWidget(self.surname_user_lineEdit)
+        self.vertical_group_vertical.addWidget(self.email_user_label)
+        self.vertical_group_vertical.addWidget(self.email_user_lineEdit)
+        self.vertical_group_vertical.addWidget(self.phone_user_label)
+        self.vertical_group_vertical.addWidget(self.phone_user_lineEdit)
+        self.vertical_group_vertical.addWidget(self.edit_pass_user_button)
+        self.vertical_group_vertical.addWidget(self.save_pass_user_button)
+
         # Добавление
 
-        self.vertical_center.addWidget(self.central_button_next)
-        self.vertical_center.addWidget(self.central_button_back)
+        self.vertical_group.addWidget(self.central_button_next)
+        self.vertical_group.addWidget(self.central_button_back)
+
+        self.vertical_center.addLayout(self.horizontal_for_menu)
+        self.stacked_widget.addWidget(self.group_box)
+        self.stacked_widget.addWidget(self.group_box_user)
+        self.vertical_center.addWidget(self.stacked_widget)
+        self.group_box_user.hide()
+
+
 
     def go_next(self):
         if self.stacked.currentIndex() != -1:
@@ -167,12 +239,83 @@ class Main(QMainWindow):
         self.more_info.show()
 
     def log_in(self):
-        self.menu_bar.show()
+        self.window = LogIn(self.db, self.menu_bar, self, self.logIn_button)
+        self.window.show()
 
     def exit(self):
         self.menu_bar.hide()
+        self.logIn_button.setEnabled(True)
+        self.stacked_widget.setCurrentIndex(0)
+
+    def user(self):
+        self.stacked_widget.setCurrentIndex(1)
+
+        self.info_user = Base().info_user(self.current_user_id)[0]
+
+        self.name_user_lineEdit.setText(self.info_user[0])
+        self.surname_user_lineEdit.setText(self.info_user[1])
+        self.email_user_lineEdit.setText(self.info_user[3])
+        self.phone_user_lineEdit.setText(self.info_user[2])
+        self.pictures_photo_user.setPixmap(QtGui.QPixmap(f"face/{self.info_user[4]}").scaled(150, 150))  # ДОБАВИТЬ ФОТО В РЕСУРСЫ
+
+    def catalog(self):
+        self.stacked_widget.setCurrentIndex(0)
+
+    def changepass(self):
+        self.window = ChangePassword()
+        self.window.show()
 
 
+class ChangePassword(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.resize(100, 200)
+        self.setWindowTitle("Смена пароля")
+
+        self.main_layout = QGridLayout(self)
+
+        self.info_password_label = QLabel("Пароль минимум 8 символов среди которых заглавные\строчный буквы, цифры, символы.")
+
+        self.old_password_label = QLabel("Старый пароль")
+        self.old_password_lineEdit = QLineEdit()
+
+        self.new_password_first_label = QLabel("Новый пароль")
+        self.new_password_first_lineEdit = QLineEdit()
+
+        self.new_password_second_label = QLabel("Повторите пароль")
+        self.new_password_second_lineEdit = QLineEdit()
+
+        self.button_saved = QPushButton("Сохранить")
+        self.button_saved.clicked.connect(self.update_password)
+
+        self.main_layout.addWidget(self.info_password_label, 0, 0, 1, 2)
+        self.main_layout.addWidget(self.old_password_label, 1, 0)
+        self.main_layout.addWidget(self.old_password_lineEdit, 1, 1)
+
+        self.main_layout.addWidget(self.new_password_first_label, 2, 0)
+        self.main_layout.addWidget(self.new_password_first_lineEdit, 2, 1)
+
+        self.main_layout.addWidget(self.new_password_second_label, 3, 0)
+        self.main_layout.addWidget(self.new_password_second_lineEdit, 3, 1)
+
+        self.main_layout.addWidget(self.button_saved, 4, 0, 1, 2)
+
+    def update_password(self):
+        self.old_pass = self.old_password_lineEdit.text()
+        self.first_pass = self.new_password_first_lineEdit.text()
+        self.second_pass = self.new_password_second_lineEdit.text()
+
+        if self.old_pass and self.first_pass and self.second_pass:
+            if self.first_pass == self.second_pass:
+               if self.old_pass != self.first_pass:
+                   print("Вход")
+               else:
+                    QMessageBox.warning(self, "Eror", "Новый пароль должен отличаться от старого")
+            else:
+                QMessageBox.warning(self, "Eror", "Пароли не совпадают")
+
+        else:
+            QMessageBox.warning(self, "Eror", "Заполните все поля")
 class MoreInfo(QWidget):
     def __init__(self, db, id):
         self.db = db
@@ -196,6 +339,51 @@ class MoreInfo(QWidget):
         self.main_layout.addWidget(QLabel(f"Модель: {self.model}"))
         self.main_layout.addWidget(QLabel(f"Перечень работ: {self.work}"))
         self.main_layout.addWidget(QLabel(f"Цена: {str(self.price)}"))
+
+
+class LogIn(QWidget):
+    def __init__(self, db, bar, main, logIn_button):
+        super().__init__()
+        self.db = db
+        self.menu_bar = bar
+        self.main_window = main
+        self.logIn_button = logIn_button
+        self.setWindowTitle("Login")
+        self.resize(370, 370)
+
+        self.lineEdit_login = QLineEdit("ivanov_i")
+        self.lineEdit_pass = QLineEdit("password123")
+        self.button_go = QPushButton("Войти")
+        self.button_reg = QPushButton("Регистрация")
+        self.button_go.clicked.connect(self.go_in)
+
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
+
+        self.main_layout.addWidget(self.lineEdit_login)
+        self.main_layout.addWidget(self.lineEdit_pass)
+        self.main_layout.addWidget(self.button_go)
+        self.main_layout.addWidget(self.button_reg)
+
+    def go_in(self):
+        self.login = self.lineEdit_login.text()
+        self.password = self.lineEdit_pass.text()
+
+        if self.login == "" or self.password == "":
+            QMessageBox.warning(self, "Eror", "Заполните все поля")
+
+        self.id_client = Base().go_in(self.login, self.password)
+        if self.id_client:
+            self.hide()
+            self.menu_bar.show()
+            if self.main_window:
+                self.main_window.current_user_id = self.id_client
+            self.logIn_button.setEnabled(False)
+            QMessageBox.information(self, "", "Авторизация успешна")
+
+
+        else:
+            QMessageBox.warning(self,"Eror", "Неверный логин или пароль")
 
 
 if __name__ == "__main__":
