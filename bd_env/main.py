@@ -1,6 +1,6 @@
 import math
 import os
-
+import re
 import pymysql
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import *
@@ -8,14 +8,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 class Base():
     def __init__(self):
         conn = pymysql.connect(
             host=os.getenv('DB_HOST'),
             user=os.getenv('DB_USER'),
             password=os.getenv('DB_PASSWORD'),
-            db=os.getenv('DB_NAME')
+            db=os.getenv('DB_NAME'),
+            autocommit=True
         )
 
         self.cursor = conn.cursor()
@@ -24,11 +24,6 @@ class Base():
         self.cursor.execute("select * from techic")
         meters = self.cursor.fetchall()
         return meters
-
-    def repair(self):
-        self.cursor.execute("select * from repair")
-        repair = self.cursor.fetchall()
-        return repair
 
     def more_info(self, id):
         self.cursor.execute(f"call More_info({id});")
@@ -47,8 +42,13 @@ class Base():
         self.cursor.execute("select name, surname, phone, email, photo from client where id_client = %s", id)
         self.name_user = self.cursor.fetchall()
         return self.name_user
-    
-    # НАЙТИ id по паролю
+
+    def changepassword(self, new_password, id_client):
+        self.cursor.execute("UPDATE client SET `password` = %s where id_client = %s;", (new_password, id_client))
+
+    def update_client(self, name, surname, email, phone, id_client):
+        self.cursor.execute("UPDATE client SET name = %s, surname = %s, email = %s, phone = %s where id_client = %s;", (name, surname, email, phone, id_client))
+        return
 
 
 
@@ -56,6 +56,8 @@ class Main(QMainWindow):
     def __init__(self, db):
         self.db = db
         self.current_user_id = None
+        self.current_user_login = None
+        self.current_user_password = None
         super().__init__()
         self.setWindowTitle("Ремонт")
         self.resize(800, 300)
@@ -114,7 +116,7 @@ class Main(QMainWindow):
 
         # bd
 
-        self.technic = self.db.technic()
+        self.technic = Base().technic()
         self.count_product = len(self.technic)
         self.count_page = math.ceil(self.count_product/5)
 
@@ -164,7 +166,7 @@ class Main(QMainWindow):
 
         # GROUP BOX 2
 
-
+        # db
         self.group_box_user = QGroupBox("О пользоватете")
         self.vertical_group_vertical = QVBoxLayout(self.group_box_user)
 
@@ -175,18 +177,27 @@ class Main(QMainWindow):
 
         self.name_user_label = QLabel("Имя")
         self.name_user_lineEdit = QLineEdit()
+        self.name_user_lineEdit.setEnabled(False)
 
         self.surname_user_label = QLabel("Фамилия")
         self.surname_user_lineEdit = QLineEdit()
+        self.surname_user_lineEdit.setEnabled(False)
 
         self.email_user_label = QLabel("Почта")
         self.email_user_lineEdit = QLineEdit()
+        self.email_user_lineEdit.setEnabled(False)
 
         self.phone_user_label = QLabel("Телефон")
         self.phone_user_lineEdit = QLineEdit()
+        self.phone_user_lineEdit.setEnabled(False)
 
         self.edit_pass_user_button = QPushButton("Изменить пароль")
+        self.red_pass_user_button = QPushButton("Редактировать")
+        self.red_pass_user_button.clicked.connect(self.red_info)
+
         self.save_pass_user_button = QPushButton("Сохранить")
+        self.save_pass_user_button.clicked.connect(self.update_client)
+        self.save_pass_user_button.hide()
 
         self.edit_pass_user_button.clicked.connect(self.changepass)
 
@@ -201,6 +212,7 @@ class Main(QMainWindow):
         self.vertical_group_vertical.addWidget(self.phone_user_label)
         self.vertical_group_vertical.addWidget(self.phone_user_lineEdit)
         self.vertical_group_vertical.addWidget(self.edit_pass_user_button)
+        self.vertical_group_vertical.addWidget(self.red_pass_user_button)
         self.vertical_group_vertical.addWidget(self.save_pass_user_button)
 
         # Добавление
@@ -246,7 +258,12 @@ class Main(QMainWindow):
         self.menu_bar.hide()
         self.logIn_button.setEnabled(True)
         self.stacked_widget.setCurrentIndex(0)
-
+        self.phone_user_lineEdit.setEnabled(False)
+        self.email_user_lineEdit.setEnabled(False)
+        self.surname_user_lineEdit.setEnabled(False)
+        self.name_user_lineEdit.setEnabled(False)
+        self.save_pass_user_button.hide()
+        self.red_pass_user_button.show()
     def user(self):
         self.stacked_widget.setCurrentIndex(1)
 
@@ -262,12 +279,48 @@ class Main(QMainWindow):
         self.stacked_widget.setCurrentIndex(0)
 
     def changepass(self):
-        self.window = ChangePassword()
+        self.window = ChangePassword(self.current_user_login, self.current_user_password)
         self.window.show()
+
+    def red_info(self):
+        self.save_pass_user_button.show()
+        self.red_pass_user_button.hide()
+        self.phone_user_lineEdit.setEnabled(True)
+        self.email_user_lineEdit.setEnabled(True)
+        self.surname_user_lineEdit.setEnabled(True)
+        self.name_user_lineEdit.setEnabled(True)
+
+    def update_client(self):
+        new_name = self.name_user_lineEdit.text().strip()
+        new_surname = self.surname_user_lineEdit.text().strip()
+        new_email = self.email_user_lineEdit.text().strip()
+        new_phone = self.phone_user_lineEdit.text().strip()
+
+        if new_name or new_surname or new_email or new_phone:
+            if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
+                if re.match(r'^\+7 \(\d{3}\) \d{3}-\d{4}$', new_phone):
+                    Base().update_client(new_name, new_surname, new_email, new_phone, self.current_user_id)
+                    QMessageBox.information(self, "info", "ДАнные изменены")
+                    self.phone_user_lineEdit.setEnabled(False)
+                    self.email_user_lineEdit.setEnabled(False)
+                    self.surname_user_lineEdit.setEnabled(False)
+                    self.name_user_lineEdit.setEnabled(False)
+                else:
+                    QMessageBox.warning(self, "Ошибка", "Введите корректный номер телефона")
+                    return
+            else:
+                QMessageBox.warning(self, "Ошибка", "Введите корректный email адрес")
+                return
+        else:
+            QMessageBox.warning(self, "Ошибка", "Все поля должны быть заполнены")
+            return
+
 
 
 class ChangePassword(QWidget):
-    def __init__(self):
+    def __init__(self, login, password):
+        self.current_login = login
+        self.current_password = password
         super().__init__()
         self.resize(100, 200)
         self.setWindowTitle("Смена пароля")
@@ -304,18 +357,27 @@ class ChangePassword(QWidget):
         self.old_pass = self.old_password_lineEdit.text()
         self.first_pass = self.new_password_first_lineEdit.text()
         self.second_pass = self.new_password_second_lineEdit.text()
+        self.current_user = Base().go_in(self.current_login, self.old_pass)
 
         if self.old_pass and self.first_pass and self.second_pass:
-            if self.first_pass == self.second_pass:
-               if self.old_pass != self.first_pass:
-                   print("Вход")
-               else:
-                    QMessageBox.warning(self, "Eror", "Новый пароль должен отличаться от старого")
+            if self.current_user:
+                if self.first_pass == self.second_pass:
+                   if self.old_pass != self.first_pass:
+                       if len(self.first_pass) > 7 and re.search(r'[A-ZА-Яa-zа-я\d!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]', self.first_pass):
+                           QMessageBox.information(self, "info", "Пароль обновлен")
+                           Base().changepassword(self.first_pass, self.current_user)
+                       else:
+                         QMessageBox.warning(self, "Eror", "Новый пароль не соответствует требованиям")
+                   else:
+                        QMessageBox.warning(self, "Eror", "Новый пароль должен отличаться от старого")
+                else:
+                    QMessageBox.warning(self, "Eror", "Пароли не совпадают")
             else:
-                QMessageBox.warning(self, "Eror", "Пароли не совпадают")
+                QMessageBox.warning(self, "Eror", "Пользователя с таким паролем не существует")
 
         else:
             QMessageBox.warning(self, "Eror", "Заполните все поля")
+
 class MoreInfo(QWidget):
     def __init__(self, db, id):
         self.db = db
@@ -352,7 +414,7 @@ class LogIn(QWidget):
         self.resize(370, 370)
 
         self.lineEdit_login = QLineEdit("ivanov_i")
-        self.lineEdit_pass = QLineEdit("password123")
+        self.lineEdit_pass = QLineEdit("12345678Ab*")
         self.button_go = QPushButton("Войти")
         self.button_reg = QPushButton("Регистрация")
         self.button_go.clicked.connect(self.go_in)
@@ -372,18 +434,21 @@ class LogIn(QWidget):
         if self.login == "" or self.password == "":
             QMessageBox.warning(self, "Eror", "Заполните все поля")
 
-        self.id_client = Base().go_in(self.login, self.password)
-        if self.id_client:
-            self.hide()
-            self.menu_bar.show()
-            if self.main_window:
-                self.main_window.current_user_id = self.id_client
-            self.logIn_button.setEnabled(False)
-            QMessageBox.information(self, "", "Авторизация успешна")
-
-
         else:
-            QMessageBox.warning(self,"Eror", "Неверный логин или пароль")
+            self.id_client = Base().go_in(self.login, self.password)
+            if self.id_client:
+                self.hide()
+                self.menu_bar.show()
+                if self.main_window:
+                    self.main_window.current_user_id = self.id_client
+                    self.main_window.current_user_login = self.login
+                    self.main_window.current_user_password = self.password
+                self.logIn_button.setEnabled(False)
+                QMessageBox.information(self, "", "Авторизация успешна")
+
+
+            else:
+                QMessageBox.warning(self,"Eror", "Неверный логин или пароль")
 
 
 if __name__ == "__main__":
